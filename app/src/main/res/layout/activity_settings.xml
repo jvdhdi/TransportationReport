@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- راننده ۱ -->
+        <TextView
+            android:text="راننده ۱"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/et_driver1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="نام و نام خانوادگی"
+            android:imeOptions="actionNext"
+            android:singleLine="true"/>
+
+        <!-- راننده ۲ -->
+        <TextView
+            android:text="راننده ۲"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/et_driver2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="نام و نام خانوادگی"
+            android:imeOptions="actionNext"
+            android:singleLine="true"/>
+
+        <!-- راننده ۳ -->
+        <TextView
+            android:text="راننده ۳"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/et_driver3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="نام و نام خانوادگی"
+            android:imeOptions="actionNext"
+            android:singleLine="true"/>
+
+        <!-- راننده ۴ -->
+        <TextView
+            android:text="راننده ۴"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/et_driver4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="نام و نام خانوادگی"
+            android:imeOptions="actionNext"
+            android:singleLine="true"/>
+
+        <!-- راننده ۵ -->
+        <TextView
+            android:text="راننده ۵"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/et_driver5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="نام و نام خانوادگی"
+            android:imeOptions="actionDone"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="ذخیره تنظیمات" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/cell_border"
+    android:padding="8dp"
+    android:layout_marginBottom="4dp">
+
+    <!-- نمایش تاریخ -->
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/primary_text"
+        android:gravity="center"
+        android:padding="4dp"
+        android:textStyle="bold"
+        tools:text="۱۴۰۳/۰۵/۱۵" />
+
+    <!-- اسکرول افقی برای نمایش اطلاعات رانندگان -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingEnd="8dp">
+
+            <!-- راننده ۱ -->
+            <TextView
+                android:id="@+id/tv_driver1"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="@drawable/cell_border"
+                android:lines="3"
+                android:minLines="3"
+                android:ellipsize="end"
+                android:textColor="@color/primary_text"
+                tools:text="رضا محمدی\n۵\n۱,۲۵۰,۰۰۰" />
+
+            <!-- راننده ۲ -->
+            <TextView
+                android:id="@+id/tv_driver2"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="@drawable/cell_border"
+                android:lines="3"
+                android:minLines="3"
+                android:ellipsize="end"
+                android:textColor="@color/primary_text"
+                tools:text="علی احمدی\n۳\n۹۵۰,۰۰۰" />
+
+            <!-- راننده ۳ -->
+            <TextView
+                android:id="@+id/tv_driver3"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="@drawable/cell_border"
+                android:lines="3"
+                android:minLines="3"
+                android:ellipsize="end"
+                android:textColor="@color/primary_text"
+                tools:text="محمد حسینی\n۴\n۱,۱۰۰,۰۰۰" />
+
+            <!-- راننده ۴ -->
+            <TextView
+                android:id="@+id/tv_driver4"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="@drawable/cell_border"
+                android:lines="3"
+                android:minLines="3"
+                android:ellipsize="end"
+                android:textColor="@color/primary_text"
+                tools:text="حسن رضایی\n۲\n۶۰۰,۰۰۰" />
+
+            <!-- راننده ۵ -->
+            <TextView
+                android:id="@+id/tv_driver5"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="@drawable/cell_border"
+                android:lines="3"
+                android:minLines="3"
+                android:ellipsize="end"
+                android:textColor="@color/primary_text"
+                tools:text="امیر کاظمی\n۰\n۰" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</LinearLayout>

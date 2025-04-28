@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:padding="16dp">
+
+
+<TextView
+    android:id="@+id/tv_empty"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="این متن بعداً تغییر خواهد کرد"
+    android:visibility="gone"/>
+
+<Button
+    android:id="@+id/btn_add_service"
+    android:text="ثبت سرویس‌های روزانه"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+<Button
+    android:id="@+id/btnViewReports"
+    android:text="📊 مشاهده گزارشات"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+
+<Button
+        android:id="@+id/btn_settings"
+        android:text="تنظیمات"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>

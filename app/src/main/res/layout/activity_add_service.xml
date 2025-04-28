@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="rtl"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- نمایش تاریخ -->
+        <TextView
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:autofillHints="date"
+            android:background="@drawable/edittext_border"
+            android:gravity="center"
+            android:minHeight="48dp"
+            android:padding="12dp"
+            android:textAlignment="center"
+            android:textColor="@color/primary_text_high_contrast"
+            android:textSize="18sp"
+            tools:text="@string/sample_date" />
+
+        <!-- انتخاب راننده -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:minHeight="56dp"
+            app:startIconDrawable="@drawable/ic_driver">
+
+            <AutoCompleteTextView
+                android:id="@+id/actvDriver"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:autofillHints="name"
+                android:completionThreshold="1"
+                android:contentDescription="@string/select_driver_desc"
+                android:hint="@string/select_driver"
+                android:inputType="none"
+                android:minWidth="120dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- مسافر ۱ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etPassenger1"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="name"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/passenger_name_desc_1"
+                android:hint="@string/passenger_name_1"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etDestination1"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etDestination1"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="address"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/destination_desc_1"
+                android:hint="@string/destination"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etFare1"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etFare1"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="transactionAmount"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/fare_desc_1"
+                android:hint="@string/fare"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etPassenger2"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <!-- مسافر ۲ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etPassenger2"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="name"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/passenger_name_desc_2"
+                android:hint="@string/passenger_name_2"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etDestination2"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etDestination2"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="address"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/destination_desc_2"
+                android:hint="@string/destination"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etFare2"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etFare2"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="transactionAmount"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/fare_desc_2"
+                android:hint="@string/fare"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etPassenger3"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <!-- مسافر ۳ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etPassenger3"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="name"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/passenger_name_desc_3"
+                android:hint="@string/passenger_name_3"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etDestination3"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etDestination3"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="address"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/destination_desc_3"
+                android:hint="@string/destination"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etFare3"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etFare3"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="transactionAmount"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/fare_desc_3"
+                android:hint="@string/fare"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etPassenger4"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <!-- مسافر ۴ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etPassenger4"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="name"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/passenger_name_desc_4"
+                android:hint="@string/passenger_name_4"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etDestination4"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etDestination4"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="address"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/destination_desc_4"
+                android:hint="@string/destination"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etFare4"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etFare4"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="transactionAmount"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/fare_desc_4"
+                android:hint="@string/fare"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etPassenger5"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <!-- مسافر ۵ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:layout_marginBottom="24dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etPassenger5"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="name"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/passenger_name_desc_5"
+                android:hint="@string/passenger_name_5"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etDestination5"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etDestination5"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="address"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/destination_desc_5"
+                android:hint="@string/destination"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords|textNoSuggestions"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:nextFocusForward="@+id/etFare5"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <EditText
+                android:id="@+id/etFare5"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:autofillHints="transactionAmount"
+                android:background="@drawable/edittext_border"
+                android:contentDescription="@string/fare_desc_5"
+                android:hint="@string/fare"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                android:maxWidth="200dp"
+                android:minWidth="120dp"
+                android:padding="12dp"
+                android:textColor="@color/primary_text_high_contrast"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="جمع کل: ۱,۰۰۰,۰۰۰ تومان" />
+
+        <!-- دکمه ثبت -->
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/button_background"
+            android:minWidth="200dp"
+            android:padding="16dp"
+            android:text="@string/submit_service"
+            android:textAllCaps="false"
+            android:textColor="@color/button_text_high_contrast"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/red"
+            android:minWidth="200dp"
+            android:padding="16dp"
+            android:text="انصراف" />  
+
+    </LinearLayout>
+</ScrollView>

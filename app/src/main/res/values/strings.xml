@@ -1,0 +1,68 @@
+<resources>
+    <string name="app_name">TransportationReport</string>
+    <string name="confirmation_title">تأیید تاریخ</string>
+    <string name="confirmation_message">آیا سرویس‌هایی که می‌خواهید ثبت کنید برای %1$s %2$s است؟</string>
+    <string name="confirm_button">تأیید</string>
+    <string name="edit_button">ویرایش</string>
+
+    <!-- تاریخ و راننده -->
+    <string name="select_date">انتخاب تاریخ</string>
+    <string name="sample_date">جمعه ۱۴۰۳/۰۳/۱۵</string>
+    <string name="select_driver">انتخاب راننده</string>
+    <string name="select_driver_desc">لیست رانندگان موجود</string>
+
+    <string name="selected_date">%1$s %2$s</string>
+    <string name="total_amount">جمع کل: %s تومان</string>
+
+    <!-- مسافران -->
+    <string name="passenger_name_1">نام مسافر ۱</string>
+    <string name="passenger_name_2">نام مسافر ۲</string>
+    <string name="passenger_name_3">نام مسافر ۳</string>
+    <string name="passenger_name_4">نام مسافر ۴</string>
+    <string name="passenger_name_5">نام مسافر ۵</string>
+
+    <string name="passenger_name_desc_1">فیلد ورود نام مسافر اول</string>
+    <string name="passenger_name_desc_2">فیلد ورود نام مسافر دوم</string>
+    <string name="passenger_name_desc_3">فیلد ورود نام مسافر سوم</string>
+    <string name="passenger_name_desc_4">فیلد ورود نام مسافر چهارم</string>
+    <string name="passenger_name_desc_5">فیلد ورود نام مسافر پنجم</string>
+
+    <!-- مقصد -->
+    <string name="destination">مقصد</string>
+    <string name="destination_desc_1">فیلد ورود مقصد مسافر اول</string>
+    <string name="destination_desc_2">فیلد ورود مقصد مسافر دوم</string>
+    <string name="destination_desc_3">فیلد ورود مقصد مسافر سوم</string>
+    <string name="destination_desc_4">فیلد ورود مقصد مسافر چهارم</string>
+    <string name="destination_desc_5">فیلد ورود مقصد مسافر پنجم</string>
+
+    <!-- کرایه -->
+    <string name="fare">کرایه</string>
+    <string name="fare_desc_1">فیلد ورود کرایه مسافر اول</string>
+    <string name="fare_desc_2">فیلد ورود کرایه مسافر دوم</string>
+    <string name="fare_desc_3">فیلد ورود کرایه مسافر سوم</string>
+    <string name="fare_desc_4">فیلد ورود کرایه مسافر چهارم</string>
+    <string name="fare_desc_5">فیلد ورود کرایه مسافر پنجم</string>
+
+    <!-- دکمه -->
+    <string name="submit_service">ثبت سرویس</string>
+    <string name="cancel">انصراف</string>
+    <string name="report_collection_title">گزارشات ارائه به مجموعه</string>
+    <string name="driver_performance_title">عملکرد رانندگان</string>
+    <string name="total_services">تعداد سرویس‌ها: %d</string>
+    <string name="total_income">جمع کل: %s تومان</string>
+    <string name="driver">راننده</string>
+    <string name="services_count">تعداد سرویس</string>
+
+         // بخش عملکرد رانندگان
+
+    <string name="total_fares">جمع کل کرایه‌ها</string>
+    <string name="export_pdf">خروجی PDF</string>
+
+        // نام‌های پیش‌فرض رانندگان
+    <string name="driver1">راننده ۱</string>
+    <string name="driver2">راننده ۲</string>
+    <string name="driver3">راننده ۳</string>
+    <string name="driver4">راننده ۴</string>
+    <string name="driver5">راننده ۵</string>
+
+</resources>

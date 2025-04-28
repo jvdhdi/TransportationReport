@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:textColor="@color/primary_text"
+    android:text="@string/total_services"
+    android:background="@drawable/cell_border">
+
+    <!-- بخش اول: جمع کل ماهانه -->
+    <TableLayout
+        android:id="@+id/monthly_summary_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*"
+        android:background="@drawable/table_border">
+
+        <TableRow>
+            <TextView
+                android:text="تعداد کل سرویس‌ها"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:textColor="@color/primary_text"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+
+            <TextView
+                android:text="جمع کل کرایه‌ها"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:textColor="@color/primary_text"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/tv_total_services"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_total_fares"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:padding="8dp"/>
+        </TableRow>
+    </TableLayout>
+
+    <!-- بخش دوم: آمار رانندگان -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:background="@drawable/table_border">
+
+            <!-- ردیف هدرها -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/tv_driver5_header"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/primary_light"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver4_header"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/primary_light"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver3_header"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/primary_light"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver2_header"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/primary_light"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver1_header"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:background="@color/primary_light"
+                    android:padding="8dp"/>
+            </TableRow>
+
+            <!-- ردیف تعداد سرویس‌ها -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/tv_driver5_services"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver4_services"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver3_services"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver2_services"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver1_services"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+            </TableRow>
+
+            <!-- ردیف مبالغ -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/tv_driver5_fares"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver4_fares"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver3_fares"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver2_fares"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+
+                <TextView
+                    android:id="@+id/tv_driver1_fares"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="8dp"/>
+            </TableRow>
+        </TableLayout>
+    </HorizontalScrollView>
+
+    <!-- بخش سوم: عملکرد روزانه -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_daily_performance"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:background="@drawable/cell_border"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+<Button
+        android:id="@+id/btn_export_pdf"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:text="خروجی PDF"
+        android:backgroundTint="@color/primary_color"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"/>
+
+</LinearLayout>
