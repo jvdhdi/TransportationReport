@@ -4,192 +4,173 @@ import android.content.Context
 import android.os.Environment
 import android.util.Log
 import androidx.core.text.BidiFormatter
-import com.itextpdf.io.font.FontProgramFactory
-import com.itextpdf.io.font.PdfEncodings
-import com.itextpdf.kernel.colors.DeviceRgb
-import com.itextpdf.kernel.font.PdfFont
-import com.itextpdf.kernel.font.PdfFontFactory
-import com.itextpdf.kernel.geom.PageSize
-import com.itextpdf.kernel.pdf.PdfDocument
-import com.itextpdf.kernel.pdf.PdfWriter
-import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.Cell
-import com.itextpdf.layout.element.Paragraph
-import com.itextpdf.layout.element.Table
-import com.itextpdf.layout.properties.*
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
+import com.tom_roush.fontbox.cmap.CMapParser
 import ir.example.transportationreport.ui.ReportCollectionActivity.ReportItem
 import java.io.File
-import java.io.IOException
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PdfExporter(private val context: Context) {
 
-    private lateinit var persianFont: PdfFont
     private val bidiFormatter = BidiFormatter.getInstance(Locale("fa", "IR"))
+    private lateinit var persianFont: PDType0Font
+    private var currentYPosition = 0f
+    private val pageMargin = 40f
+    private val rowHeight = 25f
+    private val columnWidths = floatArrayOf(100f, 100f, 100f, 100f, 100f, 80f)
+    private val a4Width = PDRectangle.A4.width
 
-    init {
-        initializeFonts()
-    }
 
-    private fun initializeFonts() {
-        try {
-            val fontBytes = context.assets.open("fonts/B_Nazanin.TTF").readBytes()
-            val fontProgram = FontProgramFactory.createFont(fontBytes)
-            persianFont = PdfFontFactory.createFont(
-                fontProgram,
-                PdfEncodings.IDENTITY_H,
-                PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED
-            )
-        } catch (e: IOException) {
-            Log.e("PDF Font", "Error loading font", e)
-            throw RuntimeException("Error loading font", e)
-        }
-    }
 
     fun exportToPdf(items: List<ReportItem>) {
-        var document: Document? = null
+        val document = PDDocument()
         try {
-            val outputFile = getOutputFile()
-            val writer = PdfWriter(outputFile)
-            val pdfDoc = PdfDocument(writer).apply {
-                setTagged()
+            val cmapParser = CMapParser()
+            val identityH = context.assets.open("cmap/Identity-H").use {
+                cmapParser.parse(it)
             }
 
-            document = Document(pdfDoc, PageSize.A4.rotate()).apply {
-                setTextAlignment(TextAlignment.LEFT)
-                setProperty(Property.BASE_DIRECTION, BaseDirection.LEFT_TO_RIGHT)
-                setMargins(40f, 40f, 40f, 40f)
-                setFont(persianFont)
-                addHeader()
-                addContent(items)
-            }
 
-            Log.d("PDF Export", "PDF file created: ${outputFile.absolutePath}")
-        } catch (e: Exception) {
-            Log.e("PDF Export", "Error creating PDF", e)
-            throw RuntimeException("Error creating PDF", e)
-        } finally {
-            document?.close()
-        }
-    }
+            val fontStream = context.assets.open("fonts/Vazir.ttf")
+            persianFont = PDType0Font.load(document, fontStream, true) // پارامتر سوم = embedSubset
 
-    private fun Document.addHeader() {
-        add(
-            createPersianParagraph("گزارش سرویس های حمل و نقل")
-                .setFontSize(18f)
-                .setBold()
-                .setTextAlignment(TextAlignment.CENTER)
-                .setMarginBottom(20f)
-        )
-    }
+            val page = PDPage(PDRectangle.A4)
+            document.addPage(page)
 
-    private fun Document.addContent(items: List<ReportItem>) {
-        items.forEach { item ->
-            when (item) {
-                is ReportItem.OverallHeader -> addOverallSection(item)
-                is ReportItem.DailyHeader -> addDailySection(item)
-                is ReportItem.ServiceRow -> addServiceRow(item)
-                ReportItem.Separator -> addSeparator()
-            }
-        }
-    }
+            PDPageContentStream(document, page).use { contentStream ->
+                currentYPosition = page.mediaBox.height - pageMargin
+                contentStream.setFont(persianFont, 12f)
 
-    private fun Document.addOverallSection(item: ReportItem.OverallHeader) {
-        add(
-            createPersianParagraph("تعداد کل سرویس ها: ${fixTextDirection(item.totalServices.toString())} | جمع کل: ${formatCurrency(item.grandTotal)}")
-                .setFontSize(14f)
-                .setMarginBottom(15f)
-        )
-    }
+                // هدر اصلی
+                addCenteredHeader(contentStream, "گزارش سرویس های حمل و نقل", 18f)
 
-    private fun Document.addDailySection(item: ReportItem.DailyHeader) {
-        add(
-            createPersianParagraph("${fixTextDirection(item.date)} | جمع روزانه: ${formatCurrency(item.dailyTotal)}")
-                .setFontSize(12f)
-                .setMarginBottom(10f)
-        )
-    }
-
-    private fun Document.addServiceRow(item: ReportItem.ServiceRow) {
-        val table = Table(6).apply {
-            width = UnitValue.createPercentValue(100f)
-            setHorizontalAlignment(HorizontalAlignment.LEFT)
-            setTextAlignment(TextAlignment.LEFT)
-            setProperty(Property.BASE_DIRECTION, BaseDirection.RIGHT_TO_LEFT)
-        }
-
-        if (item.total == "کرایه") {
-            addHeaderRow(table, item)
-        } else {
-            addDataRow(table, item)
-        }
-
-        add(table)
-    }
-
-    private fun addHeaderRow(table: Table, item: ReportItem.ServiceRow) {
-        table.apply {
-            addCell(createCell(fixTextDirection(item.col1), true))
-            addCell(createCell(fixTextDirection(item.col2), true))
-            addCell(createCell(fixTextDirection(item.col3), true))
-            addCell(createCell(fixTextDirection(item.col4), true))
-            addCell(createCell(fixTextDirection(item.col5), true))
-            addCell(createCell(fixTextDirection(item.total), true))
-        }
-    }
-
-    private fun addDataRow(table: Table, item: ReportItem.ServiceRow) {
-        table.apply {
-            addCell(createCell(fixTextDirection(item.col1), false))
-            addCell(createCell(fixTextDirection(item.col2), false))
-            addCell(createCell(fixTextDirection(item.col3), false))
-            addCell(createCell(fixTextDirection(item.col4), false))
-            addCell(createCell(fixTextDirection(item.col5), false))
-            addCell(createCell(fixTextDirection(item.total), false))
-        }
-    }
-
-    private fun createCell(text: String, isHeader: Boolean): Cell {
-        return Cell().apply {
-            width = UnitValue.createPercentValue(20f)
-            add(createPersianParagraph(text).apply {
-                if (isHeader) {
-                    setBold()
-                    setFontSize(11f)
-                } else {
-                    setFontSize(10f)
+                // افزودن محتوا
+                items.forEach { item ->
+                    when (item) {
+                        is ReportItem.OverallHeader -> addOverallSection(contentStream, item)
+                        is ReportItem.DailyHeader -> addDailySection(contentStream, item)
+                        is ReportItem.ServiceRow -> addServiceRow(contentStream, item)
+                        ReportItem.Separator -> addSeparator()
+                    }
                 }
-                setProperty(Property.BASE_DIRECTION, BaseDirection.RIGHT_TO_LEFT)
-                setTextAlignment(TextAlignment.RIGHT)
-            })
-            setPadding(5f)
-            setVerticalAlignment(VerticalAlignment.MIDDLE)
-            setTextAlignment(TextAlignment.RIGHT)
-            setProperty(Property.BASE_DIRECTION, BaseDirection.RIGHT_TO_LEFT)
-            if (isHeader) {
-                setBackgroundColor(DeviceRgb(240, 240, 240))
             }
+
+            // ذخیره فایل PDF
+            val outputFile = getOutputFile()
+            document.save(outputFile)
+            Log.d("PDF Export", "PDF با موفقیت ایجاد شد: ${outputFile.absolutePath}")
+
+        } catch (e: Exception) {
+            Log.e("PDF Export", "خطا در ایجاد PDF", e)
+            throw RuntimeException("خطا در ایجاد PDF", e)
+        } finally {
+            document.close()
         }
     }
 
-    private fun createPersianParagraph(text: String): Paragraph {
-        return Paragraph(bidiFormatter.unicodeWrap(text)).apply {
-            setFont(persianFont)
-            setTextAlignment(TextAlignment.LEFT)
-            setProperty(Property.BASE_DIRECTION, BaseDirection.RIGHT_TO_LEFT)
-            setTextAlignment(TextAlignment.RIGHT)
-        }
+    private fun addCenteredHeader(
+        contentStream: PDPageContentStream,
+        text: String,
+        fontSize: Float
+    ) {
+        contentStream.beginText()
+        contentStream.setFont(persianFont, fontSize)
+        val textWidth = persianFont.getStringWidth(text) * fontSize / 1000f
+        val xPosition = (a4Width - textWidth) / 2
+
+        contentStream.newLineAtOffset(xPosition, currentYPosition)
+        contentStream.showText(bidiFormatter.unicodeWrap(text))
+        contentStream.endText()
+        currentYPosition -= rowHeight * 2
     }
 
-    private fun Document.addSeparator() {
-        add(Paragraph("\n"))
+    private fun addOverallSection(
+        contentStream: PDPageContentStream,
+        item: ReportItem.OverallHeader
+    ) {
+        val text = "تعداد کل سرویس ها: ${fixNumbers(item.totalServices.toString())} | جمع کل: ${formatCurrency(item.grandTotal)}"
+        addTextLine(contentStream, text, 14f)
+    }
+
+    private fun addDailySection(
+        contentStream: PDPageContentStream,
+        item: ReportItem.DailyHeader
+    ) {
+        val text = "${fixTextDirection(item.date)} | جمع روزانه: ${formatCurrency(item.dailyTotal)}"
+        addTextLine(contentStream, text, 12f)
+    }
+
+    private fun addServiceRow(
+        contentStream: PDPageContentStream,
+        item: ReportItem.ServiceRow
+    ) {
+        contentStream.beginText()
+        val columns = listOf(
+            item.col1, item.col2, item.col3, item.col4, item.col5, item.total
+        )
+
+        var currentX = pageMargin
+        columns.forEachIndexed { index, text ->
+            contentStream.setFont(persianFont, if (item.isHeader) 11f else 10f)
+            val rtlText = bidiFormatter.unicodeWrap(text)
+            val xPosition = a4Width - currentX - columnWidths[index]
+
+            contentStream.newLineAtOffset(xPosition, currentYPosition)
+            contentStream.showText(rtlText)
+            contentStream.newLineAtOffset(-xPosition, 0f)
+            currentX += columnWidths[index]
+        }
+        contentStream.endText()
+        currentYPosition -= rowHeight
+    }
+
+    private fun addTextLine(
+        contentStream: PDPageContentStream,
+        text: String,
+        fontSize: Float
+    ) {
+        contentStream.beginText()
+        contentStream.setFont(persianFont, fontSize)
+        val textWidth = persianFont.getStringWidth(text) * fontSize / 1000f
+        val xPosition = (a4Width - textWidth - pageMargin)
+
+        contentStream.newLineAtOffset(xPosition, currentYPosition)
+        contentStream.showText(text)
+        contentStream.endText()
+        currentYPosition -= rowHeight
+    }
+
+    private fun addSeparator() {
+        currentYPosition -= 10f
     }
 
     private fun formatCurrency(amount: Int): String {
         val formatter = NumberFormat.getNumberInstance(Locale("fa", "IR"))
         return "${formatter.format(amount)} تومان"
+    }
+
+    private fun fixNumbers(text: String): String {
+        return text.map {
+            when (it) {
+                '0' -> '۰'
+                '1' -> '۱'
+                '2' -> '۲'
+                '3' -> '۳'
+                '4' -> '۴'
+                '5' -> '۵'
+                '6' -> '۶'
+                '7' -> '۷'
+                '8' -> '۸'
+                '9' -> '۹'
+                else -> it
+            }
+        }.joinToString("")
     }
 
     private fun fixTextDirection(text: String): String {

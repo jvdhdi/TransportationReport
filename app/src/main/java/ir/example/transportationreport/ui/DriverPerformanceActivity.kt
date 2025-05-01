@@ -2,37 +2,25 @@ package ir.example.transportationreport.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
-import com.itextpdf.kernel.colors.DeviceRgb
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.widget.Toast
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import android.view.ViewGroup
-import android.view.LayoutInflater
-import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.itextpdf.io.font.PdfEncodings
-import com.itextpdf.io.image.ImageDataFactory
-import com.itextpdf.kernel.colors.ColorConstants
-import com.itextpdf.kernel.font.PdfFont
-import com.itextpdf.kernel.font.PdfFontFactory
-import com.itextpdf.kernel.geom.PageSize
-import com.itextpdf.kernel.pdf.PdfDocument
-import com.itextpdf.kernel.pdf.PdfWriter
-import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.*
-import com.itextpdf.layout.properties.HorizontalAlignment
-import com.itextpdf.layout.properties.TextAlignment
-import com.itextpdf.layout.properties.UnitValue
-import com.itextpdf.layout.borders.SolidBorder
-import com.itextpdf.layout.properties.Property
-import com.itextpdf.layout.properties.BaseDirection
+import androidx.recyclerview.widget.RecyclerView
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
 import ir.example.transportationreport.R
 import ir.example.transportationreport.data.AppDatabase
 import ir.example.transportationreport.data.ServiceDao.DailyPerformance
@@ -43,9 +31,10 @@ import ir.example.transportationreport.ui.viewmodel.TransportViewModel
 import ir.example.transportationreport.ui.viewmodel.TransportViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.RuntimeException
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
+
 class DriverPerformanceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDriverPerformanceBinding
@@ -61,10 +50,6 @@ class DriverPerformanceActivity : AppCompatActivity() {
 
     private lateinit var dailyAdapter: DailyPerformanceAdapter
     private val driverMap = mutableMapOf<Long, String>()
-    private lateinit var persianFont: PdfFont
-    private lateinit var persianFontBold: PdfFont
-    private val textColor = ColorConstants.BLACK
-    private val headerColor = DeviceRgb(63, 81, 181)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +57,6 @@ class DriverPerformanceActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         initViews()
-        setupFonts()
         setupObservers()
     }
 
@@ -85,29 +69,6 @@ class DriverPerformanceActivity : AppCompatActivity() {
 
         binding.btnExportPdf.setOnClickListener {
             checkPermissionsAndExport()
-        }
-    }
-
-    private fun setupFonts() {
-        try {
-            val assetManager = resources.assets
-            val fontNormalStream = assetManager.open("fonts/Vazir.ttf")
-              persianFont = PdfFontFactory.createFont(
-                    fontNormalStream.readBytes(),
-                    PdfEncodings.IDENTITY_H,
-                    PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED
-                ) .apply {}
-
-            val fontBoldStream = assetManager.open("fonts/Vazir_Bold.ttf")
-           persianFontBold = PdfFontFactory.createFont(
-               fontBoldStream.readBytes(),
-               PdfEncodings.IDENTITY_H,
-               PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED
-           ).apply {}
-        } catch (e: Exception) {
-            Log.e("PDF_FONT", "Error loading fonts: ${e.stackTraceToString()}")
-            Toast.makeText(this, "خطا در ایجاد PDF", Toast.LENGTH_LONG).show()
-            throw RuntimeException("خطا در ایجاد PDF", e)
         }
     }
 
@@ -156,11 +117,6 @@ class DriverPerformanceActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateDriverUI(tvServices: TextView, tvFares: TextView, summary: DriverSummary) {
-        tvServices.text = summary.totalServices.toString()
-        tvFares.text = formatCurrency(summary.totalFares)
-    }
-
     private fun processDailyPerformance(performances: List<DailyPerformance>) {
         val groupedData = performances.groupBy { it.date }
         val processedData = groupedData.map { entry ->
@@ -170,6 +126,11 @@ class DriverPerformanceActivity : AppCompatActivity() {
             )
         }
         dailyAdapter.submitList(processedData.sortedByDescending { it.date })
+    }
+
+    private fun updateDriverUI(tvServices: TextView, tvFares: TextView, summary: DriverSummary) {
+        tvServices.text = summary.totalServices.toString()
+        tvFares.text = formatCurrency(summary.totalFares)
     }
 
     private fun checkPermissionsAndExport() {
@@ -198,184 +159,287 @@ class DriverPerformanceActivity : AppCompatActivity() {
     }
 
     private fun exportToPdf() {
+        val document = PDDocument()
         try {
-            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            val fileName = "DriverReport_${System.currentTimeMillis()}.pdf"
-            val file = File(downloadsDir, fileName)
+            // بارگذاری فونت‌های فارسی
+            val font = PDType0Font.load(document, assets.open("fonts/Vazir.ttf"))
+            val boldFont = PDType0Font.load(document, assets.open("fonts/Vazir_Bold.ttf"))
 
-            PdfWriter(FileOutputStream(file)).use { writer ->
-                PdfDocument(writer).use { pdfDocument ->
-                    Document(pdfDocument, PageSize.A4.rotate()).use { document ->
-                        document.setMargins(20f, 20f, 20f, 20f)
-                        document.setFont(persianFont)
-                        document.setProperty(Property.BASE_DIRECTION, BaseDirection.RIGHT_TO_LEFT)
-                        addHeader(document)
-                        addMonthlySummary(document)
-                        addDriverSummary(document)
-                        addDailyPerformanceTable(document)
+            // ایجاد صفحه جدید با جهت افقی (Landscape)
+            val page = PDPage(PDRectangle(PDRectangle.A4.height, PDRectangle.A4.width))
+            document.addPage(page)
+            val mediaBox = page.mediaBox
 
+            PDPageContentStream(document, page).use { contentStream ->
+                // محاسبه موقعیت اولیه
+                var yPosition = mediaBox.height - 40f
+                val marginX = 40f
 
-                    }
-                }
+                // هدر اصلی
+                contentStream.setFont(boldFont, 18f)
+                drawCenteredText(
+                    contentStream = contentStream,
+                    text = "گزارش عملکرد رانندگان",
+                    centerX = mediaBox.width / 2,
+                    y = yPosition,
+                    font = boldFont,
+                    fontSize = 18f
+                )
+                yPosition -= 40f
+
+                // تاریخ گزارش
+                contentStream.setFont(font, 12f)
+                drawTextRtl(
+                    contentStream = contentStream,
+                    text = "تاریخ گزارش: ${getCurrentDate()}",
+                    rightMargin = marginX,
+                    y = yPosition,
+                    font = font,
+                    fontSize = 12f
+                )
+                yPosition -= 60f
+
+                // جمع کل ماهانه
+                addMonthlySummary(
+                    contentStream = contentStream,
+                    marginX = marginX,
+                    yStart = yPosition,
+                    normalFont = font,
+                    boldFont = boldFont
+                )
+                yPosition -= 100f
+
+                // آمار رانندگان
+                addDriverSummary(
+                    contentStream = contentStream,
+                    marginX = marginX,
+                    yStart = yPosition,
+                    normalFont = font,
+                    boldFont = boldFont
+                )
+                yPosition -= 200f
+
+                // عملکرد روزانه
+                addDailyPerformance(
+                    contentStream = contentStream,
+                    marginX = marginX,
+                    yStart = yPosition,
+                    normalFont = font,
+                    boldFont = boldFont
+                )
             }
-            Toast.makeText(this, "PDF ذخیره شد: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+
+            // ذخیره فایل
+            val outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+            val fileName = "DriverReport_${System.currentTimeMillis()}.pdf"
+            val outputFile = File(outputDir, fileName)
+            document.save(FileOutputStream(outputFile))
+
+            Toast.makeText(
+                this,
+                "فایل PDF با موفقیت ذخیره شد:\n${outputFile.absolutePath}",
+                Toast.LENGTH_LONG
+            ).show()
+
         } catch (e: Exception) {
-            Toast.makeText(this, "خطا در ایجاد PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("PDF_EXPORT", "خطا در تولید PDF", e)
+            Toast.makeText(
+                this,
+                "خطا در ایجاد فایل PDF: ${e.localizedMessage}",
+                Toast.LENGTH_LONG
+            ).show()
+        } finally {
+            document.close()
         }
     }
 
-    private fun addHeader(document: Document) {
-        val headerTable = Table(UnitValue.createPercentArray(floatArrayOf(30f, 70f)))
-            .setWidth(UnitValue.createPercentValue(100f))
-            .setMarginBottom(20f)
+    private fun drawCenteredText(
+        contentStream: PDPageContentStream,
+        text: String,
+        centerX: Float,
+        y: Float,
+        font: PDType0Font,
+        fontSize: Float
+    ) {
+        val textWidth = font.getStringWidth(text) / 1000f * fontSize
+        val startX = centerX - (textWidth / 2)
 
-        val logo = Image(ImageDataFactory.create(resources.openRawResource(R.raw.app_logo).readBytes()))
-            .setWidth(100f)
-            .setHorizontalAlignment(HorizontalAlignment.RIGHT)
-            val title = Paragraph("گزارش عملکرد رانندگان")
-            .setFont(persianFontBold)
-            .setFontSize(18f)
-            .setFontColor(headerColor)
-            .setTextAlignment(TextAlignment.RIGHT)
-
-        val subtitle = Paragraph("تاریخ گزارش: ${getCurrentDate()}")
-            .setFont(persianFont)
-            .setFontSize(12f)
-            .setTextAlignment(TextAlignment.RIGHT)
-
-        // اصلاح Border
-        headerTable.addCell(Cell()
-            .add(title)
-            .add(subtitle)
-            .setBorder(null)
-            .setPaddingRight(10f))
-
-        document.add(headerTable)
-        document.add(Paragraph("\n"))
+        contentStream.beginText()
+        contentStream.setFont(font, fontSize)
+        contentStream.newLineAtOffset(startX, y)
+        contentStream.showText(text)
+        contentStream.endText()
     }
 
-    private fun addMonthlySummary(document: Document) {
-        val summary = viewModel.getMonthlySummary().value ?: return
+    private fun drawTextRtl(
+        contentStream: PDPageContentStream,
+        text: String,
+        rightMargin: Float,
+        y: Float,
+        font: PDType0Font,
+        fontSize: Float
+    ) {
+        val textWidth = font.getStringWidth(text) / 1000f * fontSize
+        val pageWidth = PDRectangle.A4.height // چون صفحه افقی است
+        val x = pageWidth - rightMargin - textWidth
 
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(50f, 50f)))
-            .setWidth(UnitValue.createPercentValue(100f))
-            .setMarginBottom(15f)
-
-        table.addHeaderCell(createHeaderCell("جمع کل ماهانه", 2))
-
-        addSummaryRow(table, "تعداد کل سرویس‌ها:", summary.totalServices.toString())
-        addSummaryRow(table, "مجموع درآمد کل:", "${formatCurrency(summary.totalFares)} تومان")
-
-        document.add(table)
-        document.add(Paragraph("\n"))
+        contentStream.beginText()
+        contentStream.setFont(font, fontSize)
+        contentStream.newLineAtOffset(x, y)
+        contentStream.showText(text)
+        contentStream.endText()
     }
 
-    private fun addDriverSummary(document: Document) {
-        val summaries = viewModel.getDriverPerformanceReport().value ?: return
+    private fun addMonthlySummary(
+        contentStream: PDPageContentStream,
+        marginX: Float,
+        yStart: Float,
+        normalFont: PDType0Font,
+        boldFont: PDType0Font
+    ) {
+        viewModel.getMonthlySummary().value?.let { summary ->
+            var y = yStart
 
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(40f, 30f, 30f)))
-            .setWidth(UnitValue.createPercentValue(100f))
-            .setMarginBottom(15f)
+            contentStream.setFont(boldFont, 16f)
+            drawTextRtl(
+                contentStream = contentStream,
+                text = "جمع کل ماهانه",
+                rightMargin = marginX,
+                y = y,
+                font = boldFont,
+                fontSize = 16f
+            )
+            y -= 30f
 
-        table.addHeaderCell(createHeaderCell("آمار عملکرد رانندگان", 3))
-        table.addHeaderCell(createHeaderCell("نام راننده"))
-        table.addHeaderCell(createHeaderCell("تعداد سرویس"))
-        table.addHeaderCell(createHeaderCell("جمع درآمد"))
+            contentStream.setFont(normalFont, 14f)
+            drawTextRtl(
+                contentStream = contentStream,
+                text = "تعداد کل سرویس‌ها: ${formatNumber(summary.totalServices)}",
+                rightMargin = marginX,
+                y = y,
+                font = normalFont,
+                fontSize = 14f
+            )
+            y -= 25f
 
-        summaries.forEach { summary ->
-            table.addCell(createCell(driverMap[summary.driverId] ?: "نامشخص"))
-            table.addCell(createCell(summary.totalServices.toString()))
-            table.addCell(createCell(formatCurrency(summary.totalFares)))
+            drawTextRtl(
+                contentStream = contentStream,
+                text = "مجموع درآمد کل: ${formatCurrency(summary.totalFares)} تومان",
+                rightMargin = marginX,
+                y = y,
+                font = normalFont,
+                fontSize = 14f
+            )
         }
-
-        document.add(table)
-        document.add(Paragraph("\n"))
     }
 
-    private fun addDailyPerformanceTable(document: Document) {
+    private fun addDriverSummary(
+        contentStream: PDPageContentStream,
+        marginX: Float,
+        yStart: Float,
+        normalFont: PDType0Font,
+        boldFont: PDType0Font
+    ) {
+        viewModel.getDriverPerformanceReport().value?.let { summaries ->
+            var y = yStart
+
+            contentStream.setFont(boldFont, 16f)
+            drawTextRtl(
+                contentStream = contentStream,
+                text = "آمار عملکرد رانندگان",
+                rightMargin = marginX,
+                y = y,
+                font = boldFont,
+                fontSize = 16f
+            )
+            y -= 30f
+
+            contentStream.setFont(normalFont, 14f)
+            summaries.forEach { summary ->
+                drawTextRtl(
+                    contentStream = contentStream,
+                    text = "${driverMap[summary.driverId] ?: "نامشخص"}: ${summary.totalServices} سرویس - ${formatCurrency(summary.totalFares)}",
+                    rightMargin = marginX,
+                    y = y,
+                    font = normalFont,
+                    fontSize = 14f
+                )
+                y -= 25f
+            }
+        }
+    }
+
+    private fun addDailyPerformance(
+        contentStream: PDPageContentStream,
+        marginX: Float,
+        yStart: Float,
+        normalFont: PDType0Font,
+        boldFont: PDType0Font
+    ) {
         val dailyData = dailyAdapter.getItems()
         if (dailyData.isEmpty()) return
 
-        val numColumns = driverMap.size + 1
-        val columnWidths = FloatArray(numColumns) { 100f / numColumns }
+        var y = yStart
 
-        val table = Table(UnitValue.createPercentArray(columnWidths))
-            .setWidth(UnitValue.createPercentValue(100f))
+        contentStream.setFont(boldFont, 16f)
+        drawTextRtl(
+            contentStream = contentStream,
+            text = "عملکرد روزانه",
+            rightMargin = marginX,
+            y = y,
+            font = boldFont,
+            fontSize = 16f
+        )
+        y -= 30f
 
-        table.addHeaderCell(createHeaderCell("عملکرد روزانه", numColumns))
-        table.addHeaderCell(createHeaderCell("تاریخ"))
-        driverMap.values.sorted().forEach { name ->
-            table.addHeaderCell(createHeaderCell(name))
-        }
-
+        contentStream.setFont(normalFont, 12f)
         dailyData.forEach { group ->
-            table.addCell(createCell(group.date))
+            drawTextRtl(
+                contentStream = contentStream,
+                text = group.date,
+                rightMargin = marginX,
+                y = y,
+                font = normalFont,
+                fontSize = 12f
+            )
+            y -= 20f
+
             driverMap.keys.sorted().forEach { driverId ->
                 val data = group.drivers[driverId]
-                val cellContent = if (data != null) {
-                    "${data.services} سرویس\n${formatCurrency(data.fares)} تومان"
+                val text = if (data != null) {
+                    "${driverMap[driverId] ?: "نامشخص"}: ${data.services} سرویس - ${formatCurrency(data.fares)}"
                 } else {
-                    "۰\n۰ تومان"
+                    "${driverMap[driverId] ?: "نامشخص"}: ۰ سرویس - ۰ تومان"
                 }
-                table.addCell(createCell(cellContent))
-            }
-        }
-
-        document.add(table)
-    }
-
-    private fun createHeaderCell(text: String, colSpan: Int = 1): Cell {
-        return Cell(1, colSpan)
-            .add(Paragraph()
-                .add(Text(text)
-                   .setFont(persianFontBold)
-                   .setFontSize(12f)
-                   .setFontColor(ColorConstants.WHITE)
-                .setBaseDirection(BaseDirection.RIGHT_TO_LEFT)
-            )
-            .setBackgroundColor(headerColor)
-            .setPadding(8f)
-            .setTextAlignment(TextAlignment.RIGHT))
-    }
-
-    private fun createCell(text: String): Cell {
-        return Cell()
-            .add(Paragraph()
-                .add(Text(text)
-                    .setFont(persianFont)
-                    .setFontSize(10f)
-                    .setFontColor(textColor)
-                    .setBaseDirection(BaseDirection.RIGHT_TO_LEFT)
+                drawTextRtl(
+                    contentStream = contentStream,
+                    text = text,
+                    rightMargin = marginX + 20f,
+                    y = y,
+                    font = normalFont,
+                    fontSize = 12f
                 )
-                .setTextAlignment(TextAlignment.RIGHT)
-            .setPadding(6f)
-            .setBorderBottom(SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
-            )}
-
-    private fun addSummaryRow(table: Table, label: String, value: String) {
-        table.addCell(Cell()
-            .add(Paragraph(label).setFont(persianFontBold))
-            .setPadding(6f)
-            .setTextAlignment(TextAlignment.RIGHT))
-
-        table.addCell(Cell()
-            .add(Paragraph(value).setFont(persianFont))
-            .setPadding(6f)
-            .setTextAlignment(TextAlignment.RIGHT)
-            .setPadding(6f))
+                y -= 20f
+            }
+            y -= 10f
+        }
     }
 
     private fun formatCurrency(amount: Int): String {
         val formatter = NumberFormat.getNumberInstance(Locale("fa", "IR"))
-        return formatter.format(amount)
+        return formatter.format(amount).replace(',', '٫')
+    }
+
+    private fun formatNumber(number: Int): String {
+        val formatter = NumberFormat.getNumberInstance(Locale("fa", "IR"))
+        return formatter.format(number).replace(',', '٫')
     }
 
     private fun getCurrentDate(): String {
-        val calendar = java.util.Calendar.getInstance()
-        val year = calendar.get(java.util.Calendar.YEAR)
-        val month = calendar.get(java.util.Calendar.MONTH) + 1
-        val day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
-        return "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
+        val calendar = Calendar.getInstance()
+        return "${calendar.get(Calendar.YEAR)}/${
+            (calendar.get(Calendar.MONTH) + 1).toString().padStart(2, '0')}/${
+            calendar.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')}"
     }
 
     private inner class DailyPerformanceAdapter :
@@ -430,6 +494,7 @@ class DriverPerformanceActivity : AppCompatActivity() {
             }
         }
     }
+
     private data class DailyPerformanceGroup(
         val date: String,
         val drivers: Map<Long, DailyPerformance>

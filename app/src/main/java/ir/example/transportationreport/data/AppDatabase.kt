@@ -10,7 +10,7 @@ import ir.example.transportationreport.model.Service
 
 @Database(
     entities = [Driver::class, Service::class, Passenger::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -161,14 +161,12 @@ class ReportCollectionActivity : AppCompatActivity() {
 
     private fun exportPdf() {
         try {
-            // PdfExporter(this).exportToPdf(currentItem)
-            SimplePdfExporter(this).createTestPdf() // تست نسخه ساده
+            PdfExporter(this).exportToPdf(currentItem)
             Toast.makeText(this, "PDF ایجاد شد", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(this, "خطا در ایجاد PDF: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

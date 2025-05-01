@@ -29,6 +29,13 @@ android {
         }
     }
 
+
+    sourceSets {
+            getByName("main") {
+                assets.srcDirs ("src/main/assets/cmap")
+            }
+        }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -63,19 +70,11 @@ android {
                     "META-INF/NOTICE",
                     "META-INF/NOTICE.txt",
                     "META-INF/notice.txt",
-                    "META-INF/ASL2.0",
-                    "META-INF/*.kotlin_module",
-                    "META-INF/native-image/**",
-                    "META-INF/INDEX.LIST",
-                    "META-INF/*",
-                    "**/module-info.class",
-                    "DebugProbesKt.bin"
-
+                    "META-INF/ASL2.0"
                 )
             }
         }
     }
-
 
 kapt {
     correctErrorTypes = true
@@ -113,17 +112,12 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
-
-    implementation("com.itextpdf:itext7-core:8.0.4")
-    implementation("com.itextpdf:layout:8.0.4")
-    implementation("com.itextpdf:html2pdf:4.0.5")
-    implementation("com.itextpdf:font-asian:8.0.4")
-    implementation("com.itextpdf:kernel:8.0.4")
-    implementation("com.itextpdf:io:8.0.4")
     coreLibraryDesugaring("com.android.tools.desugar_jdk_libs:2.0.4")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
 
     // Testing
     testImplementation("junit:junit:4.13.2")

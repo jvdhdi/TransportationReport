@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# قوانین PDFBox
+-keep class com.tom_roush.** { *; }
+-keep class org.apache.** { *; }
+-dontwarn com.tom_roush.**
+-dontwarn org.apache.**
+-keep class com.tom_roush.pdfbox.** { *; }
+-keep class com.tom_roush.fontbox.** { *; }
+-keep class com.tom_roush.harmony.** { *; }
