@@ -32,7 +32,7 @@ android {
 
     sourceSets {
             getByName("main") {
-                assets.srcDirs ("src/main/assets/cmap")
+                assets.srcDirs ("src/main/assets")
             }
         }
 
@@ -114,6 +114,7 @@ dependencies {
     kapt("androidx.room:room-compiler:$roomVersion")
     coreLibraryDesugaring("com.android.tools.desugar_jdk_libs:2.0.4")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("com.ibm.icu:icu4j:74.2")
 
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

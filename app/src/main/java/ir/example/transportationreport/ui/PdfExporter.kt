@@ -3,65 +3,56 @@ package ir.example.transportationreport.ui
 import android.content.Context
 import android.os.Environment
 import android.util.Log
-import androidx.core.text.BidiFormatter
+import com.ibm.icu.text.Bidi
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.PDPage
 import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
 import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
 import com.tom_roush.pdfbox.pdmodel.font.PDType0Font
-import com.tom_roush.fontbox.cmap.CMapParser
 import ir.example.transportationreport.ui.ReportCollectionActivity.ReportItem
 import java.io.File
+import java.io.IOException
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PdfExporter(private val context: Context) {
 
-    private val bidiFormatter = BidiFormatter.getInstance(Locale("fa", "IR"))
     private lateinit var persianFont: PDType0Font
     private var currentYPosition = 0f
     private val pageMargin = 40f
     private val rowHeight = 25f
     private val columnWidths = floatArrayOf(100f, 100f, 100f, 100f, 100f, 80f)
     private val a4Width = PDRectangle.A4.width
-
-
+    private var currentPage: PDPage? = null
+    private var contentStream: PDPageContentStream? = null
 
     fun exportToPdf(items: List<ReportItem>) {
         val document = PDDocument()
         try {
-            val cmapParser = CMapParser()
-            val identityH = context.assets.open("cmap/Identity-H").use {
-                cmapParser.parse(it)
-            }
-
+            System.setProperty("cmap.base.url", "file:///android_asset/cmap/")
 
             val fontStream = context.assets.open("fonts/Vazir.ttf")
-            persianFont = PDType0Font.load(document, fontStream, true) // پارامتر سوم = embedSubset
+            persianFont = PDType0Font.load(document, fontStream, true)
 
-            val page = PDPage(PDRectangle.A4)
-            document.addPage(page)
+            currentPage = PDPage(PDRectangle.A4)
+            document.addPage(currentPage)
+            contentStream = PDPageContentStream(document, currentPage)
+            currentYPosition = currentPage!!.mediaBox.height - pageMargin
 
-            PDPageContentStream(document, page).use { contentStream ->
-                currentYPosition = page.mediaBox.height - pageMargin
-                contentStream.setFont(persianFont, 12f)
+            addCenteredHeader("گزارش سرویس های حمل و نقل", 18f, document)
 
-                // هدر اصلی
-                addCenteredHeader(contentStream, "گزارش سرویس های حمل و نقل", 18f)
-
-                // افزودن محتوا
-                items.forEach { item ->
-                    when (item) {
-                        is ReportItem.OverallHeader -> addOverallSection(contentStream, item)
-                        is ReportItem.DailyHeader -> addDailySection(contentStream, item)
-                        is ReportItem.ServiceRow -> addServiceRow(contentStream, item)
-                        ReportItem.Separator -> addSeparator()
-                    }
+            items.forEach { item ->
+                checkPageSpace(50f, document)
+                when (item) {
+                    is ReportItem.OverallHeader -> addOverallSection(item)
+                    is ReportItem.DailyHeader -> addDailySection(item)
+                    is ReportItem.ServiceRow -> addServiceRow(item)
+                    ReportItem.Separator -> addSeparator()
                 }
             }
 
-            // ذخیره فایل PDF
+            contentStream?.close()
             val outputFile = getOutputFile()
             document.save(outputFile)
             Log.d("PDF Export", "PDF با موفقیت ایجاد شد: ${outputFile.absolutePath}")
@@ -74,80 +65,99 @@ class PdfExporter(private val context: Context) {
         }
     }
 
-    private fun addCenteredHeader(
-        contentStream: PDPageContentStream,
-        text: String,
-        fontSize: Float
-    ) {
-        contentStream.beginText()
-        contentStream.setFont(persianFont, fontSize)
-        val textWidth = persianFont.getStringWidth(text) * fontSize / 1000f
+    private fun addCenteredHeader(text: String, fontSize: Float, document: PDDocument) {
+        checkPageSpace(rowHeight * 2, document)
+        contentStream?.beginText()
+        contentStream?.setFont(persianFont, fontSize)
+
+        val rtlText = reorderRtlText(text)
+        val textWidth = persianFont.getStringWidth(rtlText) * fontSize / 1000f
         val xPosition = (a4Width - textWidth) / 2
 
-        contentStream.newLineAtOffset(xPosition, currentYPosition)
-        contentStream.showText(bidiFormatter.unicodeWrap(text))
-        contentStream.endText()
+        contentStream?.newLineAtOffset(xPosition, currentYPosition)
+        contentStream?.showText(rtlText)
+        contentStream?.endText()
         currentYPosition -= rowHeight * 2
     }
 
-    private fun addOverallSection(
-        contentStream: PDPageContentStream,
-        item: ReportItem.OverallHeader
-    ) {
-        val text = "تعداد کل سرویس ها: ${fixNumbers(item.totalServices.toString())} | جمع کل: ${formatCurrency(item.grandTotal)}"
-        addTextLine(contentStream, text, 14f)
+    private fun addOverallSection(item: ReportItem.OverallHeader) {
+        val text = "تعداد کل سرویس ها: ${formatNumber(item.totalServices)} | جمع کل: ${formatCurrency(item.grandTotal)}"
+        addTextLine(text, 14f)
     }
 
-    private fun addDailySection(
-        contentStream: PDPageContentStream,
-        item: ReportItem.DailyHeader
-    ) {
-        val text = "${fixTextDirection(item.date)} | جمع روزانه: ${formatCurrency(item.dailyTotal)}"
-        addTextLine(contentStream, text, 12f)
+    private fun addDailySection(item: ReportItem.DailyHeader) {
+        val text = "${reorderRtlText(item.date)} | جمع روزانه: ${formatCurrency(item.dailyTotal)}"
+        addTextLine(text, 12f)
     }
 
-    private fun addServiceRow(
-        contentStream: PDPageContentStream,
-        item: ReportItem.ServiceRow
-    ) {
-        contentStream.beginText()
+    private fun addServiceRow(item: ReportItem.ServiceRow) {
+        contentStream?.beginText()
         val columns = listOf(
             item.col1, item.col2, item.col3, item.col4, item.col5, item.total
         )
 
-        var currentX = pageMargin
-        columns.forEachIndexed { index, text ->
-            contentStream.setFont(persianFont, if (item.isHeader) 11f else 10f)
-            val rtlText = bidiFormatter.unicodeWrap(text)
-            val xPosition = a4Width - currentX - columnWidths[index]
+        var cumulativeWidth = 0f
+        columns.reversed().forEachIndexed { index, text ->
+            val columnIndex = columns.size - 1 - index
+            val rtlText = reorderRtlText(text)
+            val fontSize = if (item.isHeader) 11f else 10f
 
-            contentStream.newLineAtOffset(xPosition, currentYPosition)
-            contentStream.showText(rtlText)
-            contentStream.newLineAtOffset(-xPosition, 0f)
-            currentX += columnWidths[index]
+            // محاسبه موقعیت X از راست صفحه
+            val xPosition = a4Width - pageMargin - cumulativeWidth - (columnWidths[columnIndex] / 2)
+            val textWidth = persianFont.getStringWidth(rtlText) * fontSize / 1000f
+            val adjustedX = xPosition - (textWidth / 2)
+
+            contentStream?.setFont(persianFont, fontSize)
+            contentStream?.newLineAtOffset(adjustedX, currentYPosition)
+            contentStream?.showText(rtlText)
+            contentStream?.newLineAtOffset(-adjustedX, 0f)
+
+            cumulativeWidth += columnWidths[columnIndex]
         }
-        contentStream.endText()
+        contentStream?.endText()
         currentYPosition -= rowHeight
     }
 
-    private fun addTextLine(
-        contentStream: PDPageContentStream,
-        text: String,
-        fontSize: Float
-    ) {
-        contentStream.beginText()
-        contentStream.setFont(persianFont, fontSize)
-        val textWidth = persianFont.getStringWidth(text) * fontSize / 1000f
-        val xPosition = (a4Width - textWidth - pageMargin)
+    private fun addTextLine(text: String, fontSize: Float) {
+        contentStream?.beginText()
+        contentStream?.setFont(persianFont, fontSize)
 
-        contentStream.newLineAtOffset(xPosition, currentYPosition)
-        contentStream.showText(text)
-        contentStream.endText()
+        val rtlText = reorderRtlText(text)
+        val textWidth = persianFont.getStringWidth(rtlText) * fontSize / 1000f
+        val xPosition = a4Width - textWidth - pageMargin
+
+        contentStream?.newLineAtOffset(xPosition, currentYPosition)
+        contentStream?.showText(rtlText)
+        contentStream?.endText()
         currentYPosition -= rowHeight
     }
 
     private fun addSeparator() {
-        currentYPosition -= 10f
+        checkPageSpace(20f, null)
+        contentStream?.setLineWidth(0.5f)
+        contentStream?.moveTo(pageMargin, currentYPosition)
+        contentStream?.lineTo(a4Width - pageMargin, currentYPosition)
+        contentStream?.stroke()
+        currentYPosition -= 15f
+    }
+
+    private fun checkPageSpace(requiredHeight: Float, document: PDDocument?) {
+        if (currentYPosition - requiredHeight < pageMargin) {
+            contentStream?.close()
+            currentPage = PDPage(PDRectangle.A4)
+            document?.addPage(currentPage)
+            contentStream = PDPageContentStream(document, currentPage)
+            currentYPosition = currentPage!!.mediaBox.height - pageMargin
+        }
+    }
+
+    private fun reorderRtlText(text: String): String {
+        return try {
+            val bidi = Bidi(text, Bidi.DIRECTION_RIGHT_TO_LEFT)
+            bidi.writeReordered(Bidi.DO_MIRRORING.toInt())
+        } catch (e: Exception) {
+            text
+        }
     }
 
     private fun formatCurrency(amount: Int): String {
@@ -155,28 +165,12 @@ class PdfExporter(private val context: Context) {
         return "${formatter.format(amount)} تومان"
     }
 
-    private fun fixNumbers(text: String): String {
-        return text.map {
-            when (it) {
-                '0' -> '۰'
-                '1' -> '۱'
-                '2' -> '۲'
-                '3' -> '۳'
-                '4' -> '۴'
-                '5' -> '۵'
-                '6' -> '۶'
-                '7' -> '۷'
-                '8' -> '۸'
-                '9' -> '۹'
-                else -> it
-            }
-        }.joinToString("")
+    private fun formatNumber(number: Int): String {
+        val formatter = NumberFormat.getNumberInstance(Locale("fa", "IR"))
+        return formatter.format(number)
     }
 
-    private fun fixTextDirection(text: String): String {
-        return bidiFormatter.unicodeWrap(text)
-    }
-
+    @Throws(IOException::class)
     private fun getOutputFile(): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         return File(
